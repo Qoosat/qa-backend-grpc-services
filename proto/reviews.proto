@@ -1,0 +1,146 @@
+syntax = "proto3";
+
+package cinescope.reviews;
+
+// ============================================================================
+// Review Service - CRUD операции с отзывами
+// ============================================================================
+
+service ReviewService {
+  // Создать новый отзыв (сохраняется с hidden=true, затем вызывается модерация)
+  rpc CreateReview(CreateReviewRequest) returns (CreateReviewResponse);
+
+  // Получить отзыв по составному ключу (user_id, movie_id)
+  rpc GetReview(GetReviewRequest) returns (GetReviewResponse);
+
+  // Список отзывов с фильтрацией и пагинацией
+  rpc ListReviews(ListReviewsRequest) returns (ListReviewsResponse);
+
+  // Обновить видимость отзыва (вызывается из Moderation Service)
+  rpc UpdateReviewVisibility(UpdateReviewVisibilityRequest) returns (UpdateReviewVisibilityResponse);
+}
+
+// ============================================================================
+// Moderation Service - Автоматическая модерация отзывов
+// ============================================================================
+
+service ModerationService {
+  // Проверить текст отзыва по правилам модерации
+  rpc ModerateReview(ModerateReviewRequest) returns (ModerateReviewResponse);
+
+  // Получить историю модераций для отзыва
+  rpc GetModerationHistory(GetModerationHistoryRequest) returns (GetModerationHistoryResponse);
+
+  // Получить статистику модерации (для тестирования пустых ответов)
+  rpc GetModerationStats(GetModerationStatsRequest) returns (GetModerationStatsResponse);
+}
+
+// ============================================================================
+// Review Service Messages
+// ============================================================================
+
+message CreateReviewRequest {
+  string user_id = 1;      // TEXT тип из БД
+  int32 movie_id = 2;      // INTEGER тип из БД
+  string text = 3;         // Текст отзыва
+  int32 rating = 4;        // Рейтинг 1-5
+}
+
+message CreateReviewResponse {
+  Review review = 1;                // Созданный отзыв
+  ModerationResult moderation = 2;  // Результат модерации
+}
+
+message GetReviewRequest {
+  string user_id = 1;      // Составной ключ часть 1
+  int32 movie_id = 2;      // Составной ключ часть 2
+}
+
+message GetReviewResponse {
+  Review review = 1;
+}
+
+message ListReviewsRequest {
+  int32 movie_id = 1;      // Фильтр по фильму
+  int32 limit = 2;         // Лимит для пагинации (default 10)
+  int32 offset = 3;        // Смещение для пагинации (default 0)
+  bool show_hidden = 4;    // Показывать скрытые отзывы (default false)
+}
+
+message ListReviewsResponse {
+  repeated Review reviews = 1;  // Список отзывов
+  int32 total = 2;              // Общее количество
+}
+
+message UpdateReviewVisibilityRequest {
+  string user_id = 1;
+  int32 movie_id = 2;
+  bool hidden = 3;         // Новое значение видимости
+}
+
+message UpdateReviewVisibilityResponse {
+  bool success = 1;
+}
+
+// ============================================================================
+// Moderation Service Messages
+// ============================================================================
+
+message ModerateReviewRequest {
+  string user_id = 1;      // Для связи с reviews
+  int32 movie_id = 2;      // Для связи с reviews
+  string text = 3;         // Текст отзыва для проверки
+}
+
+message ModerateReviewResponse {
+  string action = 1;       // 'approved', 'rejected', 'pending'
+  string reason = 2;       // Причина (например 'profanity detected')
+}
+
+message GetModerationHistoryRequest {
+  string user_id = 1;
+  int32 movie_id = 2;
+}
+
+message GetModerationHistoryResponse {
+  repeated ModerationLogEntry history = 1;
+}
+
+message GetModerationStatsRequest {
+  // Пустой запрос - возвращает общую статистику
+}
+
+message GetModerationStatsResponse {
+  int32 total = 1;         // Всего модераций
+  int32 approved = 2;      // Одобренных
+  int32 rejected = 3;      // Отклоненных
+  int32 pending = 4;       // В ожидании
+}
+
+// ============================================================================
+// Shared Data Models
+// ============================================================================
+
+message Review {
+  string user_id = 1;
+  int32 movie_id = 2;
+  bool hidden = 3;
+  string text = 4;
+  int32 rating = 5;
+  string created_at = 6;   // Timestamp as ISO 8601 string
+}
+
+message ModerationResult {
+  string action = 1;       // 'approved', 'rejected', 'pending'
+  string reason = 2;       // Причина (null для approved)
+}
+
+message ModerationLogEntry {
+  int32 id = 1;
+  string review_user_id = 2;
+  int32 review_movie_id = 3;
+  string action = 4;       // 'approved', 'rejected', 'pending'
+  string reason = 5;       // Причина модерации
+  string moderated_by = 6; // Кто модерировал (default 'auto')
+  string created_at = 7;   // Timestamp as ISO 8601 string
+}

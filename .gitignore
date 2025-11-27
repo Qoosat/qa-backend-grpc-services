@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Generated proto files
+*_pb2.py
+*_pb2_grpc.py
+*_pb2.pyi
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kubernetes secrets (если локальные)
+k8s/secrets/
+*.secret.yaml
+
+# Logs
+*.log
+
+# Docker
+.dockerignore
+
+# Environment
+.env
+.env.local
+
+#claude
+.env.example
+current_prompt.txt
+.claude/
+db/
+k8s/
+PROJECT_BRIEF.md
