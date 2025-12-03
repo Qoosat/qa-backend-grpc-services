@@ -40,7 +40,7 @@ k8s/secrets/
 
 #claude
 .env.example
-current_prompt.txt
+current_prompt
 .claude/
 db/
 k8s/
