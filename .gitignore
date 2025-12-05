@@ -43,5 +43,5 @@ k8s/secrets/
 current_prompt
 .claude/
 db/
-k8s/
+
 PROJECT_BRIEF.md

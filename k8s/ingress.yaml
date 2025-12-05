@@ -1,0 +1,45 @@
+# сгенерировано клауд кодом, смотри другой ингресс как рабочий
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grpc-services-ingress
+  namespace: dev
+  annotations:
+    # Для gRPC нужен специальный ingress controller с поддержкой HTTP/2
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Таймауты для длительных gRPC соединений
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+spec:
+  ingressClassName: nginx
+  rules:
+  # Review Service на поддомене review.cinescope.local
+  - host: review.cinescope.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: review-service
+            port:
+              number: 50051
+  # Moderation Service на поддомене moderation.cinescope.local
+  - host: moderation.cinescope.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: moderation-service
+            port:
+              number: 50052
+  # Можно добавить TLS (опционально)
+  # tls:
+  # - hosts:
+  #   - review.cinescope.local
+  #   - moderation.cinescope.local
+  #   secretName: grpc-services-tls

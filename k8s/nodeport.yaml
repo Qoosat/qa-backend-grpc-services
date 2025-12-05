@@ -1,0 +1,37 @@
+# NodePort для Review Service (альтернатива LoadBalancer для локальных кластеров)
+apiVersion: v1
+kind: Service
+metadata:
+  name: review-service-nodeport
+  namespace: dev
+  labels:
+    app: review-service
+spec:
+  type: NodePort
+  ports:
+  - name: grpc
+    port: 50051
+    targetPort: 50051
+    nodePort: 30051  # Порт на ноде (30000-32767)
+    protocol: TCP
+  selector:
+    app: review-service
+---
+# NodePort для Moderation Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: moderation-service-nodeport
+  namespace: dev
+  labels:
+    app: moderation-service
+spec:
+  type: NodePort
+  ports:
+  - name: grpc
+    port: 50052
+    targetPort: 50052
+    nodePort: 30052  # Порт на ноде (30000-32767)
+    protocol: TCP
+  selector:
+    app: moderation-service

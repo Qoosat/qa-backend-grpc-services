@@ -1,0 +1,35 @@
+# LoadBalancer для Review Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: review-service-lb
+  namespace: dev
+  labels:
+    app: review-service
+spec:
+  type: LoadBalancer
+  ports:
+  - name: grpc
+    port: 50051
+    targetPort: 50051
+    protocol: TCP
+  selector:
+    app: review-service
+---
+# LoadBalancer для Moderation Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: moderation-service-lb
+  namespace: dev
+  labels:
+    app: moderation-service
+spec:
+  type: LoadBalancer
+  ports:
+  - name: grpc
+    port: 50052
+    targetPort: 50052
+    protocol: TCP
+  selector:
+    app: moderation-service

@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grpc-ingress
+  namespace: dev
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    nginx.ingress.kubernetes.io/grpc-backend: "true"
+spec:
+  tls:
+    - hosts:
+        - grpc-review.dev-cinescope.coconutqa.ru
+        - grpc-moderation.dev-cinescope.coconutqa.ru
+      secretName: grpc-tls  # cert-manager создастся автоматически НАДЕЮСЬ БЛЯТЬЬ
+  rules:
+    - host: grpc-review.dev-cinescope.coconutqa.ru
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: review-service
+                port:
+                  number: 50051
+    - host: grpc-moderation.dev-cinescope.coconutqa.ru
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: moderation-service
+                port:
+                  number: 50052
