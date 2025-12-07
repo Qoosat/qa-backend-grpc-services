@@ -150,12 +150,12 @@ class ModerationServiceServicer(reviews_pb2_grpc.ModerationServiceServicer):
             if has_profanity:
                 action = 'rejected'
                 reason = 'profanity detected'
-                hidden = True
+                hidden = False
                 log.info("profanity_detected", words=found_words)
             else:
                 action = 'approved'
                 reason = None
-                hidden = False
+                hidden = True
                 log.info("review_approved")
 
             # Сохранение в moderation_log

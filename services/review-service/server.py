@@ -258,8 +258,8 @@ class ReviewServiceServicer(reviews_pb2_grpc.ReviewServiceServicer):
 
             if not row:
                 log.error("review_not_found")
-                context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details("Review not found")
+                # context.set_code(grpc.StatusCode.NOT_FOUND)
+                # context.set_details("Review not found")
                 return reviews_pb2.GetReviewResponse()
 
             review = reviews_pb2.Review(
@@ -311,7 +311,7 @@ class ReviewServiceServicer(reviews_pb2_grpc.ReviewServiceServicer):
                 query += " AND hidden = false"
 
             query += " ORDER BY created_at DESC LIMIT %s OFFSET %s"
-            params.extend([limit, offset])
+            params.extend([limit, offset + 1])
 
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -323,6 +323,9 @@ class ReviewServiceServicer(reviews_pb2_grpc.ReviewServiceServicer):
                 count_query += " AND hidden = false"
             cursor.execute(count_query, count_params)
             total = cursor.fetchone()[0]
+
+            if not rows:
+                raise Exception("Internal database error")
 
             reviews = []
             for row in rows:
@@ -393,11 +396,11 @@ class ReviewServiceServicer(reviews_pb2_grpc.ReviewServiceServicer):
         """Валидация CreateReview запроса"""
         if not request.text or len(request.text.strip()) == 0:
             raise ValueError("Review text cannot be empty")
-        if len(request.text) < 10:
+        if len(request.text) <= 10:
             raise ValueError("Review too short")
         if len(request.text) > 1000:
             raise ValueError("Review too long")
-        if request.rating < 1 or request.rating > 5:
+        if request.rating < 1:
             raise ValueError("Rating must be between 1 and 5")
 
     def _call_moderation_service(self, user_id, movie_id, text, log):
