@@ -18,6 +18,7 @@ from grpc_reflection.v1alpha import reflection
 import psycopg2
 from psycopg2 import pool, sql, extras
 import structlog
+import logging
 
 # Импорт сгенерированных proto файлов
 import reviews_pb2
@@ -26,6 +27,12 @@ import reviews_pb2_grpc
 # ============================================================================
 # Logging Configuration
 # ============================================================================
+LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
+logging.basicConfig(
+    format='%(message)s',
+    stream=sys.stdout,
+    level=LOG_LEVEL
+)
 
 structlog.configure(
     processors=[
